@@ -11,6 +11,63 @@ router = APIRouter()
 
 gemini = GeminiService()
 
+COMMON_TECH_KEYWORDS = [
+    # Languages
+    "python", "java", "javascript", "typescript", "go", "c++", "c#", "ruby", "rust",
+    # Backend
+    "fastapi", "django", "flask", "spring", "node.js", "express", "rails",
+    # Frontend
+    "react", "next.js", "vue", "angular", "svelte",
+    # Databases
+    "postgresql", "mysql", "mongodb", "redis", "dynamodb", "elasticsearch",
+    # Cloud / Infra
+    "aws", "gcp", "azure", "kubernetes", "docker", "terraform", "helm",
+    "kafka", "rabbitmq", "grpc", "microservices", "serverless",
+    # AI / Data
+    "pandas", "numpy", "pytorch", "tensorflow", "llm", "rag", "spark",
+    # DevOps / Others
+    "ci/cd", "git", "github", "gitlab", "jenkins", "argo", "prometheus", "grafana"
+]
+
+def parse_job_description(job_description: str) -> dict:
+    """
+    Very simple parser:
+    - Extracts tech stack keywords by scanning text
+    - Uses first 2-3 sentences as a 'mission' summary fallback
+    """
+    if not job_description:
+        return {"company_tech_stack": None, "company_mission": None}
+    
+    text_lower = job_description.lower()
+    
+    # Extract tech stack
+    tech_found = []
+    for tech in COMMON_TECH_KEYWORDS:
+        # match tech word approximately
+        if tech in text_lower:
+            tech_found.append(tech.capitalize() if tech.islower() else tech)
+    
+    # De-duplicate while preserving order
+    seen = set()
+    tech_stack = []
+    for t in tech_found:
+        if t.lower() not in seen:
+            tech_stack.append(t)
+            seen.add(t.lower())
+    
+    # Very basic mission extraction: first 2-3 sentences
+    import re
+    sentences = re.split(r'(?<=[.!?])\s+', job_description.strip())
+    mission = None
+    if sentences:
+        mission = " ".join(sentences[:2]).strip()
+    
+    return {
+        "company_tech_stack": tech_stack or None,
+        "company_mission": mission or None
+    }
+
+
 # Request Models - ENHANCED for Varad style
 class SubjectLineRequest(BaseModel):
     recipient_first_name: str
@@ -44,17 +101,39 @@ class CompleteEmailRequest(BaseModel):
     purpose: str = "job_inquiry"
     role_interested_in: Optional[str] = None
     role_url: Optional[str] = None
+
+    # 🔹 NEW: Raw job description pasted from LinkedIn
+    job_description: Optional[str] = Field(
+        None,
+        description="Full job description text pasted from LinkedIn"
+    )
     
     # Company research - THE SECRET SAUCE
-    company_mission: Optional[str] = Field(None, description="What the company actually builds/solves")
-    company_tech_stack: Optional[List[str]] = Field(None, description="Specific technologies they use")
-    company_notable_clients: Optional[List[str]] = Field(None, description="Big customers/users")
+    company_mission: Optional[str] = Field(
+        None,
+        description="What the company actually builds/solves. If omitted and job_description is provided, it will be auto-derived."
+    )
+    company_tech_stack: Optional[List[str]] = Field(
+        None,
+        description="Specific technologies they use. If omitted and job_description is provided, it will be auto-derived."
+    )
+    company_notable_clients: Optional[List[str]] = Field(
+        None,
+        description="Big customers/users"
+    )
     
     # Customization
-    specific_passion_point: Optional[str] = Field(None, description="Why YOU care about this specific problem")
-    technical_hook: Optional[str] = Field(None, description="Specific technical challenge that excites you")
+    specific_passion_point: Optional[str] = Field(
+        None,
+        description="Why YOU care about this specific problem"
+    )
+    technical_hook: Optional[str] = Field(
+        None,
+        description="Specific technical challenge that excites you"
+    )
     
     tone: str = "professional"
+
 
 # Response Models
 class SubjectLineResponse(BaseModel):
@@ -114,6 +193,19 @@ async def generate_complete_email(request: CompleteEmailRequest):
     try:
         logger.info(f"Generating Varad-style email for {request.recipient_first_name} at {request.recipient_company}")
         
+        # 🔹 If job_description is provided, auto-derive mission/tech_stack when missing
+        company_mission = request.company_mission
+        company_tech_stack = request.company_tech_stack
+        
+        if request.job_description and (not company_mission or not company_tech_stack):
+            parsed = parse_job_description(request.job_description)
+            if not company_mission and parsed["company_mission"]:
+                company_mission = parsed["company_mission"]
+                logger.info("Derived company_mission from job_description")
+            if not company_tech_stack and parsed["company_tech_stack"]:
+                company_tech_stack = parsed["company_tech_stack"]
+                logger.info(f"Derived tech stack from JD: {company_tech_stack}")
+        
         # Build prompt with all the new context
         prompt = PromptBuilder.build_complete_email_prompt(
             recipient_first_name=request.recipient_first_name,
@@ -131,8 +223,8 @@ async def generate_complete_email(request: CompleteEmailRequest):
             purpose=request.purpose,
             role_interested_in=request.role_interested_in,
             role_url=request.role_url,
-            company_mission=request.company_mission,
-            company_tech_stack=request.company_tech_stack,
+            company_mission=company_mission,
+            company_tech_stack=company_tech_stack,
             company_notable_clients=request.company_notable_clients,
             specific_passion_point=request.specific_passion_point,
             technical_hook=request.technical_hook,

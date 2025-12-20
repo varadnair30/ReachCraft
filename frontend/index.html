@@ -304,8 +304,14 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="companyMission">Company Mission / What They Build *</label>
-                    <textarea id="companyMission" required placeholder="e.g., Building reliable, interpretable, and steerable AI systems"></textarea>
+                    
+                        <label for="jobDescription">Job Description (Paste from LinkedIn) *</label>
+                        <textarea id="jobDescription" required placeholder="Paste the full job description here"></textarea>
+                        <small style="font-size: 12px; color: #666;">
+                            Tech stack and company focus will be auto-derived from this description.
+                        </small>
+                    
+                    
                 </div>
                 
                 <div class="form-group">
@@ -412,10 +418,13 @@
         document.getElementById('emailForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const jd = document.getElementById('jobDescription').value.trim();
+
             const formData = {
                 recipient_first_name: document.getElementById('contactName').value,
                 recipient_company: document.getElementById('company').value,
                 recipient_title: document.getElementById('contactTitle').value || null,
+
                 sender_name: "Varad Nair",
                 sender_background: "4+ years building full-stack, cloud-native systems, distributed services, and scalable microservices",
                 sender_skills: [
@@ -423,12 +432,20 @@
                     "PostgreSQL", "Docker", "Kubernetes", "GCP",
                     "Distributed Systems", "CI/CD", "Microservices"
                 ],
+
                 role_interested_in: document.getElementById('role').value,
-                company_mission: document.getElementById('companyMission').value,
-                company_tech_stack: techStack,
+
+                // 🔹 Only JD is sent; backend derives mission + tech stack
+                job_description: jd,
+
+                company_mission: null,          // let backend fill this
+                company_tech_stack: techStack.length ? techStack : null, // tags override; empty = derive from JD
+
                 specific_passion_point: document.getElementById('passionPoint').value || null,
                 technical_hook: document.getElementById('technicalHook').value || null
             };
+
+
             
             // Show loading
             document.getElementById('emailForm').style.display = 'none';
