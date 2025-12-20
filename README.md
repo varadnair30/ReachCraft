@@ -1,4 +1,3 @@
-
 # ReachCraft 🚀
 
 > AI-powered job application automation that turns cold emails into warm conversations
@@ -12,29 +11,31 @@
 
 Job seekers send 200+ applications before landing an offer, with cold applications having only a **0.1-2% success rate**. However, **sourced candidates who reach out directly are 5x more likely to get hired**. The challenge? Personalizing hundreds of cold emails is impossible while juggling interviews, daily responsibilities, and job search stress.
 
-Existing tools (Hunter.io \`\$49/month\`, Apollo.io \`\$79/month\`) are expensive and rely on paid APIs. **ReachCraft is 100% free, open-source, and built for job seekers by a job seeker.**
+Existing tools (Hunter.io `$49/month`, Apollo.io `$79/month`) are expensive and rely on paid APIs. **ReachCraft is 100% free, open-source, and built for job seekers by a job seeker.**
 
 ## ✨ Features
 
-### 🔍 Intelligent Email Discovery
+### 🤖 AI-Powered Personalization ✅ LIVE
+- **Resume-driven email generation** that adapts to each role's requirements
+- **Role-specific "I KNOW WHAT YOU WANT" sections** (defense autonomy ≠ fintech backend ≠ AI/ML)
+- **Dynamic intro paragraphs** that highlight relevant experience per job description
+- **Non-cliché subject line generation** using Gemini Flash 1.5
+- **Anti-hallucination safeguards** with grounded resume facts
+- **Simple web UI** for single-job email generation (batch queue coming soon)
+
+### 🔍 Intelligent Email Discovery (Coming Week 2)
 - Multi-source email finding (LinkedIn, company websites, GitHub)
 - Pattern detection algorithms (firstname.lastname@company.com)
 - Waterfall fallback system (local → Browserless → Bright Data)
 - SMTP + DNS verification for 95%+ accuracy
 
-### 🤖 AI-Powered Personalization
-- Non-cliche subject line generation (Gemini Flash 1.5)
-- RAG-enhanced email bodies (FAISS + LangChain)
-- Context-aware personalization (company news, recipient background)
-- Anti-hallucination safeguards
-
-### 📧 Smart Sending & Tracking
+### 📧 Smart Sending & Tracking (Coming Week 3)
 - Dual email provider (Resend + SendGrid, 6,000 free emails/month)
 - Intelligent rate limiting (avoid spam flags)
 - Open/click tracking with analytics dashboard
-- Auto follow-ups (coming soon)
+- Auto follow-ups
 
-### 🎨 Chrome Extension UI
+### 🎨 Chrome Extension UI (Coming Week 4)
 - Bulk upload via CSV or manual entry
 - Real-time campaign progress tracking
 - A/B testing for subject lines
@@ -42,26 +43,26 @@ Existing tools (Hunter.io \`\$49/month\`, Apollo.io \`\$79/month\`) are expensiv
 
 ## 🛠️ Tech Stack
 
-**Frontend**: React 18, TypeScript, Vite, TailwindCSS, React Query  
-**Backend**: FastAPI, Python 3.10, Celery, Redis  
-**Database**: Supabase (PostgreSQL 15 + Auth + Real-time)  
-**AI/ML**: Gemini Flash, LangChain, FAISS, sentence-transformers  
-**Scraping**: Playwright, Browserless.io, Bright Data  
-**Email**: Resend, SendGrid, ZeroBounce  
-**Monitoring**: Sentry, Langfuse  
-**Deployment**: Render (backend), Vercel (landing page), Docker
+**Frontend**: Simple HTML/CSS/JS (v1), React + TypeScript + TailwindCSS (planned)  
+**Backend**: FastAPI, Python 3.10  
+**Database**: Supabase (PostgreSQL) - schema created, persistence coming Week 2  
+**AI/ML**: Gemini Flash 1.5  
+**Scraping**: Playwright (planned), Browserless.io (planned)  
+**Email**: Resend (planned), SendGrid (planned)  
+**Queue/Cache**: Celery + Redis (planned)  
+**Monitoring**: Sentry (planned), Langfuse (planned)  
+**Deployment**: Local dev (current), Render + Vercel + Docker (planned)
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.10+
-- Node.js 18+
-- Docker & Docker Compose (optional)
 - Chrome browser
+- Gemini API key (free tier: 1,500 requests/day)
 
 ### Installation
 
-\`\`\`bash
+```bash
 # Clone repository
 git clone https://github.com/varadnair30/ReachCraft.git
 cd ReachCraft
@@ -78,34 +79,42 @@ source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
-playwright install chromium
 
 # Configure environment variables
 cp .env.example .env
-# Edit .env with your API keys
+# Add your GEMINI_API_KEY to .env
 
 # Run backend
 uvicorn app.main:app --reload
-# Visit: http://127.0.0.1:8000
-\`\`\`
+# API docs: http://127.0.0.1:8000/docs
 
-### Docker Setup (Alternative)
+# In a separate terminal, run frontend (from ReachCraft/frontend)
+python -m http.server 3000
+# UI: http://localhost:3000
+```
 
-\`\`\`bash
+### Docker Setup (Coming Soon)
+
+```bash
 # From project root
 docker-compose up
 # Backend: http://localhost:8000
-\`\`\`
+```
 
 ## 📊 Project Status
 
-**Current Phase**: Week 1 - Backend Foundation + Email Discovery  
-**Progress**: 🔨 Infrastructure setup complete
+**Current Phase**: Week 1 Complete ✅ | Week 2 Starting 🚀  
+**Progress**: AI email generation engine live with working UI
 
 ### Development Timeline
 - [x] Week 0: Planning & Architecture
-- [ ] Week 1: Backend Foundation + Email Discovery
-- [ ] Week 2: AI Personalization + RAG
+- [x] **Week 1: Backend Foundation + AI Email Generation**
+  - [x] FastAPI backend with `/api/ai-generation/generate-complete` endpoint
+  - [x] Resume-driven prompt builder with role adaptation
+  - [x] Simple web UI for testing email generation
+  - [x] Supabase database schema (campaigns, emails, contacts tables)
+  - [x] Gemini Flash 1.5 integration
+- [ ] Week 2: Database Persistence + Email Discovery
 - [ ] Week 3: Email Sending + Tracking
 - [ ] Week 4: Chrome Extension
 - [ ] Week 5: Polish + Testing + Deployment
@@ -115,44 +124,44 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for detailed weekly milestones.
 
 ## 🏗️ Architecture
 
-\`\`\`
+```
 ┌─────────────────────────────────────────┐
-│   Chrome Extension (React + TS)         │
+│   Simple HTML/JS UI (v1)                │
+│   [Chrome Extension coming Week 4]      │
 └──────────────┬──────────────────────────┘
                │ REST API
 ┌──────────────▼──────────────────────────┐
-│   FastAPI Backend + Celery Workers      │
-└──┬────────┬──────────┬──────────────────┘
-   │        │          │
-   ▼        ▼          ▼
-[Discovery][AI Gen][Email Send]
-   │        │          │
-   ▼        ▼          ▼
-┌─────────────────────────────────────────┐
-│  Supabase (PostgreSQL + Auth)           │
-│  Upstash Redis (Cache + Queue)          │
-└─────────────────────────────────────────┘
-\`\`\`
+│   FastAPI Backend                       │
+│   - /api/ai-generation/generate-complete│
+│   - Resume-driven prompt builder        │
+└──┬────────────────────────────────────┬──┘
+   │                                    │
+   ▼                                    ▼
+┌──────────────────┐         ┌──────────────────┐
+│  Gemini Flash    │         │  Supabase        │
+│  (AI Generation) │         │  (PostgreSQL)    │
+└──────────────────┘         └──────────────────┘
+```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design.
 
 ## 💰 Cost
 
-**Total: \$5 one-time** (Chrome Web Store developer fee)
+**Total: $0** (currently using only free tiers)
 
 All services use free tiers:
-- Supabase: 500MB database (free forever)
-- Gemini Flash: 1,500 requests/day (free forever)
-- Resend: 3,000 emails/month (free)
-- SendGrid: 3,000 emails/month (free)
-- Render: 750 hours/month (free)
-- Browserless: 5 hours/month (free)
+- **Gemini Flash 1.5**: 1,500 requests/day (free forever)
+- **Supabase**: 500MB PostgreSQL database (free forever)
+- Resend: 3,000 emails/month (free) *[planned]*
+- SendGrid: 3,000 emails/month (free) *[planned]*
+- Render: 750 hours/month (free) *[planned]*
+- Browserless: 5 hours/month (free) *[planned]*
 
 ## 📈 Impact Goals
 
 - **50,000+ personalized emails** sent for job seekers
 - **120% increase** in response rates vs generic applications
-- **\$0 cost** for users (no paid API dependencies)
+- **$0 cost** for users (no paid API dependencies)
 - **1,000+ GitHub stars** (help other job seekers!)
 
 ## 🤝 Contributing
@@ -184,22 +193,26 @@ MS Computer Science @ UT Arlington | 4+ years experience in Full-Stack + AI/ML
 - [Architecture Overview](docs/ARCHITECTURE.md)
 - [Development Roadmap](docs/ROADMAP.md)
 - [API Documentation](docs/API.md)
-- [Deployment Guide](docs/DEPLOYMENT.md)
+- [Deployment Guide](docs/DEPLOYMENT.md) *[coming soon]*
 - [Contributing Guidelines](CONTRIBUTING.md)
 
 ## 🐛 Known Issues
 
-None yet! This is Week 1. Report issues [here](https://github.com/varadnair30/ReachCraft/issues).
+None yet! Report issues [here](https://github.com/varadnair30/ReachCraft/issues).
 
 ## 🗓️ Development Log
 
-### Week 1 - Day 1 (December 14, 2025)
+### Week 1 - Complete ✅ (December 14-20, 2025)
 - ✅ Project scaffolding complete
-- ✅ FastAPI backend initialized
+- ✅ FastAPI backend initialized with `/api/ai-generation/generate-complete`
 - ✅ Virtual environment configured
-- ✅ Dependencies installed
+- ✅ Dependencies installed (FastAPI, Gemini SDK, Supabase client)
 - ✅ Git repository initialized
-- 🔜 Next: Supabase database setup
+- ✅ Supabase database schema created (campaigns, emails, contacts tables)
+- ✅ Resume-driven prompt builder with role-specific adaptation
+- ✅ Simple web UI for testing email generation
+- ✅ Tested on defense autonomy, AI/ML, and backend roles
+- 🔜 Next: Wire up database persistence + Email discovery pipeline (Week 2)
 
 ---
 
