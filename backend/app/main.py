@@ -12,7 +12,7 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:3000', 'http://localhost:5173', 'chrome-extension://*'],
+    allow_origins=['http://localhost:3000', 'http://localhost:5173', 'chrome-extension://*', 'null'],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],

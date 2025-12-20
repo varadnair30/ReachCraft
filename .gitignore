@@ -161,3 +161,20 @@ yarn-error.log*
 *.user
 *.userosscache
 *.sln.docstates
+
+
+# ================================
+# REACHCRAFT SPECIFIC
+# ================================
+# Generated emails (optional - uncomment if you don't want to track them)
+# generated_emails/
+# *.txt
+
+# Test data
+my_target_jobs.json
+test_*.py
+
+# Temporary files
+varad_style_prompt_builder.py
+check_models.py
+test_gemini_direct.py

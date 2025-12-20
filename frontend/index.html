@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReachCraft - AI Email Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .tech-stack-input {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .tech-stack-input input {
+            flex: 1;
+        }
+        
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .tech-tag {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .tech-tag button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .results.active {
+            display: block;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .result-card h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        
+        .subject-line {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .email-body {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-secondary:hover {
+            background: #f0f0ff;
+        }
+        
+        .alternatives {
+            margin-top: 20px;
+        }
+        
+        .alternatives ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .alternatives li {
+            padding: 10px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .metrics {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-error {
+            background: #fee;
+            color: #c00;
+            border: 1px solid #fcc;
+        }
+        
+        .alert-success {
+            background: #efe;
+            color: #060;
+            border: 1px solid #cfc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 ReachCraft</h1>
+            <p>AI-Powered Email Generation in Your Winning Style</p>
+        </div>
+        
+        <div class="content">
+            <div id="alert" style="display: none;"></div>
+            
+            <form id="emailForm">
+                <div class="form-group">
+                    <label for="company">Company Name *</label>
+                    <input type="text" id="company" required placeholder="e.g., Anthropic">
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Role Title *</label>
+                    <input type="text" id="role" required placeholder="e.g., Software Engineer, Infrastructure">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contactName">Contact Name *</label>
+                    <input type="text" id="contactName" required placeholder="e.g., Sarah">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contactTitle">Contact Title</label>
+                    <input type="text" id="contactTitle" placeholder="e.g., Engineering Manager">
+                </div>
+                
+                <div class="form-group">
+                    <label for="companyMission">Company Mission / What They Build *</label>
+                    <textarea id="companyMission" required placeholder="e.g., Building reliable, interpretable, and steerable AI systems"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="techStack">Tech Stack</label>
+                    <div class="tech-stack-input">
+                        <input type="text" id="techStackInput" placeholder="e.g., Python, Kubernetes">
+                        <button type="button" onclick="addTechStack()" class="btn" style="width: auto; padding: 12px 20px;">Add</button>
+                    </div>
+                    <div id="techTags" class="tech-tags"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="passionPoint">Why This Excites You (Optional)</label>
+                    <textarea id="passionPoint" placeholder="e.g., AI safety and reliability at scale"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="technicalHook">Technical Challenge That Excites You (Optional)</label>
+                    <textarea id="technicalHook" placeholder="e.g., Building distributed systems that handle complex model inference at scale"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 12px;">
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()" style="flex: 1;">🗑️ Clear Form</button>
+                    <button type="submit" class="btn" style="flex: 2;">🔥 Generate Killer Email</button>
+                </div>
+            </form>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Generating your killer email...</p>
+                <p style="font-size: 14px; color: #666; margin-top: 8px;">This takes 10-15 seconds</p>
+            </div>
+            
+            <div id="results" class="results">
+                <div class="result-card">
+                    <h3>📧 Subject Line</h3>
+                    <div class="subject-line" id="subjectLine"></div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>✉️ Email Body</h3>
+                    <div class="email-body" id="emailBody"></div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn" onclick="copyToClipboard()">📋 Copy Email to Clipboard</button>
+                    <button class="btn btn-secondary" onclick="goBack()">⬅️ Back to Form</button>
+                    <button class="btn btn-secondary" onclick="clearForm(); generateAnother();">🗑️ Clear & New</button>
+                </div>
+                
+                <div class="result-card alternatives">
+                    <h3>💡 Alternative Subject Lines</h3>
+                    <ul id="altSubjects"></ul>
+                </div>
+                
+                <div class="result-card">
+                    <h3>📊 Metrics</h3>
+                    <div class="metrics">
+                        <span>📝 Words: <strong id="wordCount"></strong></span>
+                        <span>⏱️ Read time: <strong id="readTime"></strong>s</span>
+                        <span>✅ Confidence: <strong id="confidence"></strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let techStack = [];
+        
+        function addTechStack() {
+            const input = document.getElementById('techStackInput');
+            const value = input.value.trim();
+            
+            if (value && !techStack.includes(value)) {
+                techStack.push(value);
+                renderTechTags();
+                input.value = '';
+            }
+        }
+        
+        function removeTech(tech) {
+            techStack = techStack.filter(t => t !== tech);
+            renderTechTags();
+        }
+        
+        function renderTechTags() {
+            const container = document.getElementById('techTags');
+            container.innerHTML = techStack.map(tech => 
+                `<span class="tech-tag">
+                    ${tech}
+                    <button onclick="removeTech('${tech}')">×</button>
+                </span>`
+            ).join('');
+        }
+        
+        document.getElementById('techStackInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTechStack();
+            }
+        });
+        
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                recipient_first_name: document.getElementById('contactName').value,
+                recipient_company: document.getElementById('company').value,
+                recipient_title: document.getElementById('contactTitle').value || null,
+                sender_name: "Varad Nair",
+                sender_background: "4+ years building full-stack, cloud-native systems, distributed services, and scalable microservices",
+                sender_skills: [
+                    "Python", "TypeScript", "React", "FastAPI", 
+                    "PostgreSQL", "Docker", "Kubernetes", "GCP",
+                    "Distributed Systems", "CI/CD", "Microservices"
+                ],
+                role_interested_in: document.getElementById('role').value,
+                company_mission: document.getElementById('companyMission').value,
+                company_tech_stack: techStack,
+                specific_passion_point: document.getElementById('passionPoint').value || null,
+                technical_hook: document.getElementById('technicalHook').value || null
+            };
+            
+            // Show loading
+            document.getElementById('emailForm').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results').classList.remove('active');
+            hideAlert();
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/ai-generation/generate-complete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Display results
+                document.getElementById('subjectLine').textContent = data.subject_line;
+                document.getElementById('emailBody').textContent = data.body;
+                document.getElementById('wordCount').textContent = data.word_count;
+                document.getElementById('readTime').textContent = data.estimated_read_time;
+                document.getElementById('confidence').textContent = data.confidence_score.toFixed(2);
+                
+                const altList = document.getElementById('altSubjects');
+                altList.innerHTML = data.subject_variations
+                    .map(subj => `<li>${subj}</li>`)
+                    .join('');
+                
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('results').classList.add('active');
+                
+                showAlert('Email generated successfully! 🎉', 'success');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('emailForm').style.display = 'block';
+                showAlert('Failed to generate email. Make sure the backend server is running on http://127.0.0.1:8000', 'error');
+            }
+        });
+        
+        function copyToClipboard() {
+            const subject = document.getElementById('subjectLine').textContent;
+            const body = document.getElementById('emailBody').textContent;
+            const fullEmail = `Subject: ${subject}\n\n${body}`;
+            
+            navigator.clipboard.writeText(fullEmail).then(() => {
+                showAlert('📋 Email copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                showAlert('Failed to copy to clipboard', 'error');
+            });
+        }
+        
+        function generateAnother() {
+            document.getElementById('emailForm').style.display = 'block';
+            document.getElementById('results').classList.remove('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                hideAlert();
+            }, 5000);
+        }
+        
+        function hideAlert() {
+            document.getElementById('alert').style.display = 'none';
+        }
+        
+        function clearForm() {
+            if (confirm('Are you sure you want to clear the form?')) {
+                document.getElementById('emailForm').reset();
+                techStack = [];
+                renderTechTags();
+                showAlert('Form cleared! 🗑️', 'success');
+            }
+        }
+        
+        function goBack() {
+            if (confirm('Go back to form? (Current results will be lost)')) {
+                generateAnother();
+            }
+        }
+    </script>
+</body>
+</html>
