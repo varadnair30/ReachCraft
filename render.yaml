@@ -1,20 +1,19 @@
-# Render deployment configuration for ReachCraft backend
 services:
   - type: web
     name: reachcraft-backend
     runtime: python
-    region: oregon  # Free tier region
+    region: oregon
     plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GOOGLE_API_KEY
-        sync: false  # Manually set in Render dashboard
+        sync: false
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
         sync: false
       - key: PYTHON_VERSION
-        value: "3.10.0"
+        value: "3.10.15"  # ← ADD THIS
     healthCheckPath: /health
