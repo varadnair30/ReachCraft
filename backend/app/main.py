@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes.email_discovery import router as email_discovery_router
+from backend.app.api.routes.email_discovery import router as email_discovery_router
 from app.api.routes.ai_generation import router as ai_generation_router
 
 app = FastAPI(
