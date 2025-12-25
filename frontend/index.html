@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReachCraft - AI Email Generator</title>
+    <title>ReachCraft - AI Email Generator & Finder</title>
     <style>
         * {
             margin: 0;
@@ -64,6 +64,35 @@
 
         .btn-header:hover {
             background: rgba(255,255,255,0.3);
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: #fff;
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            background: white;
+            border-bottom-color: #667eea;
         }
 
         .content {
@@ -299,7 +328,7 @@
             border: 1px solid #ffeeba;
         }
 
-        /* History Modal Styles */
+        /* History Modal */
         .modal {
             display: none;
             position: fixed;
@@ -405,13 +434,6 @@
             padding: 60px 20px;
             color: #999;
         }
-
-        .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
     </style>
 </head>
 <body>
@@ -421,10 +443,17 @@
                 <button class="btn-header" onclick="openHistory()">📚 History</button>
             </div>
             <h1>🚀 ReachCraft</h1>
-            <p>AI-Powered Email Generation in Your Winning Style</p>
+            <p>AI Email Generator & Email Finder</p>
         </div>
 
-        <div class="content">
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('generator')">✉️ Email Generator</div>
+            <div class="tab" onclick="switchTab('finder')">🔍 Email Finder</div>
+        </div>
+
+        <!-- Email Generator Section -->
+        <div id="generatorSection" class="content">
             <div id="alert" style="display: none;"></div>
 
             <form id="emailForm">
@@ -524,6 +553,87 @@
                 </div>
             </div>
         </div>
+
+        <!-- Email Finder Section -->
+        <div id="finderSection" class="content" style="display: none;">
+            <div id="finderAlert" style="display: none;"></div>
+
+            <form id="emailFinderForm">
+                <div class="form-group">
+                    <label for="finderFirstName">First Name *</label>
+                    <input type="text" id="finderFirstName" required placeholder="e.g., Nikita">
+                </div>
+
+                <div class="form-group">
+                    <label for="finderLastName">Last Name *</label>
+                    <input type="text" id="finderLastName" required placeholder="e.g., Mishra">
+                </div>
+
+                <div class="form-group">
+                    <label for="finderCompanyDomain">Company Domain *</label>
+                    <input type="text" id="finderCompanyDomain" required placeholder="e.g., twitch.tv">
+                    <small style="font-size: 12px; color: #666;">
+                        Just the domain (e.g., 'company.com'), not the full URL
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="finderCompanyName">Company Name</label>
+                    <input type="text" id="finderCompanyName" placeholder="e.g., Twitch">
+                </div>
+
+                <div class="form-group">
+                    <label for="finderTitle">Job Title</label>
+                    <input type="text" id="finderTitle" placeholder="e.g., Engineering Manager">
+                </div>
+
+                <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px;">
+                    <input type="checkbox" id="finderVerify" checked style="width: auto; margin: 0;">
+                    <label for="finderVerify" style="margin: 0; font-weight: normal;">
+                        Verify emails via SMTP (takes 5-10 seconds)
+                    </label>
+                </div>
+
+                <button type="submit" class="btn">🔍 Find Emails</button>
+            </form>
+
+            <div id="finderLoading" class="loading">
+                <div class="spinner"></div>
+                <p>Finding and verifying emails...</p>
+                <p style="font-size: 14px; color: #666; margin-top: 8px;">This may take a few seconds</p>
+            </div>
+
+            <div id="finderResults" class="results">
+                <div class="result-card">
+                    <h3>✅ Best Match</h3>
+                    <div id="bestMatchCard" style="background: white; padding: 20px; border-radius: 8px; margin-top: 12px;">
+                        <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 8px;" id="bestEmail"></div>
+                        <div style="font-size: 14px; color: #666; margin-bottom: 12px;">
+                            Pattern: <strong id="bestPattern"></strong> | 
+                            Confidence: <strong id="bestConfidence"></strong>
+                        </div>
+                        <div style="font-size: 13px; color: #999;" id="bestReason"></div>
+                        <button class="btn" onclick="copyBestEmail()" style="margin-top: 16px; width: auto; padding: 10px 24px;">
+                            📋 Copy Email
+                        </button>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h3>📧 All Candidates (<span id="candidateCount">0</span>)</h3>
+                    <div id="candidatesList" style="margin-top: 12px;"></div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 12px;">
+                    <button class="btn" onclick="findAnotherEmail()" style="flex: 2;">
+                        🔍 Find Another Email
+                    </button>
+                    <button class="btn btn-secondary" onclick="switchTab('generator')" style="flex: 1;">
+                        ← Email Generator
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- History Modal -->
@@ -544,7 +654,25 @@
 
     <script>
         let techStack = [];
+        let bestEmailCache = null;
 
+        // Tab switching
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show/hide sections
+            if (tab === 'generator') {
+                document.getElementById('generatorSection').style.display = 'block';
+                document.getElementById('finderSection').style.display = 'none';
+            } else if (tab === 'finder') {
+                document.getElementById('generatorSection').style.display = 'none';
+                document.getElementById('finderSection').style.display = 'block';
+            }
+        }
+
+        // Tech stack management
         function addTechStack() {
             const input = document.getElementById('techStackInput');
             const value = input.value.trim();
@@ -555,6 +683,18 @@
                 input.value = '';
             }
         }
+
+        // find another email
+        function findAnotherEmail() {
+            document.getElementById('emailFinderForm').reset();
+            document.getElementById('finderVerify').checked = true;
+            document.getElementById('finderResults').classList.remove('active');
+            document.getElementById('emailFinderForm').style.display = 'block';
+            bestEmailCache = null;
+            hideFinderAlert();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
 
         function removeTech(tech) {
             techStack = techStack.filter(t => t !== tech);
@@ -578,6 +718,7 @@
             }
         });
 
+        // Email Generator Form
         document.getElementById('emailForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -589,7 +730,6 @@
                 recipient_company: document.getElementById('company').value,
                 recipient_title: document.getElementById('contactTitle').value || null,
                 recipient_email: contactEmail,
-
                 sender_name: "Varad Nair",
                 sender_background: "4+ years building full-stack, cloud-native systems, distributed services, and scalable microservices",
                 sender_skills: [
@@ -597,19 +737,14 @@
                     "PostgreSQL", "Docker", "Kubernetes", "GCP",
                     "Distributed Systems", "CI/CD", "Microservices"
                 ],
-
                 role_interested_in: document.getElementById('role').value,
-
                 job_description: jd,
-
                 company_mission: null,
                 company_tech_stack: techStack.length ? techStack : null,
-
                 specific_passion_point: document.getElementById('passionPoint').value || null,
                 technical_hook: document.getElementById('technicalHook').value || null
             };
 
-            // Show loading
             document.getElementById('emailForm').style.display = 'none';
             document.getElementById('loading').classList.add('active');
             document.getElementById('results').classList.remove('active');
@@ -630,12 +765,10 @@
 
                 const data = await response.json();
 
-                // Show duplicate warning if exists
                 if (data.duplicate_warning) {
                     showAlert(data.duplicate_warning, 'warning');
                 }
 
-                // Display results
                 document.getElementById('subjectLine').textContent = data.subject_line;
                 document.getElementById('emailBody').textContent = data.body;
                 document.getElementById('wordCount').textContent = data.word_count;
@@ -662,12 +795,111 @@
             }
         });
 
+        // Email Finder Form
+        document.getElementById('emailFinderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                first_name: document.getElementById('finderFirstName').value,
+                last_name: document.getElementById('finderLastName').value,
+                company_domain: document.getElementById('finderCompanyDomain').value,
+                company_name: document.getElementById('finderCompanyName').value || null,
+                title: document.getElementById('finderTitle').value || null,
+                verify: document.getElementById('finderVerify').checked,
+                save_to_db: true
+            };
+
+            document.getElementById('emailFinderForm').style.display = 'none';
+            document.getElementById('finderLoading').classList.add('active');
+            document.getElementById('finderResults').classList.remove('active');
+            hideFinderAlert();
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/email-discovery/discover', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.best_match) {
+                    bestEmailCache = data.best_match.email;
+
+                    document.getElementById('bestEmail').textContent = data.best_match.email;
+                    document.getElementById('bestPattern').textContent = data.best_match.pattern;
+
+                    const confidencePercent = (data.best_match.confidence * 100).toFixed(0);
+                    const confidenceColor = data.best_match.confidence >= 0.7 ? '#060' : 
+                                           data.best_match.confidence >= 0.5 ? '#f90' : '#c00';
+                    document.getElementById('bestConfidence').innerHTML = 
+                        `<span style="color: ${confidenceColor}">${confidencePercent}%</span>`;
+
+                    document.getElementById('bestReason').textContent = data.best_match.reason;
+                }
+
+                document.getElementById('candidateCount').textContent = data.total_found;
+
+                const candidatesList = document.getElementById('candidatesList');
+                candidatesList.innerHTML = data.candidates.map(candidate => {
+                    const confidencePercent = (candidate.confidence * 100).toFixed(0);
+                    const confidenceColor = candidate.confidence >= 0.7 ? '#060' : 
+                                           candidate.confidence >= 0.5 ? '#f90' : '#c00';
+                    const validIcon = candidate.valid === true ? '✅' : 
+                                     candidate.valid === false ? '❌' : '❓';
+
+                    return `
+                        <div style="background: white; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px;">
+                                        ${validIcon} ${candidate.email}
+                                    </div>
+                                    <div style="font-size: 13px; color: #666;">
+                                        ${candidate.pattern} • 
+                                        <span style="color: ${confidenceColor}; font-weight: 600;">
+                                            ${confidencePercent}% confidence
+                                        </span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #999; margin-top: 4px;">
+                                        ${candidate.reason}
+                                    </div>
+                                </div>
+                                <button onclick="copyEmail('${candidate.email}')" 
+                                        style="background: #667eea; color: white; border: none; padding: 8px 16px; 
+                                               border-radius: 6px; cursor: pointer; font-size: 13px;">
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('finderLoading').classList.remove('active');
+                document.getElementById('finderResults').classList.add('active');
+
+                showFinderAlert(`Found ${data.total_found} email candidates! 🎉`, 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('finderLoading').classList.remove('active');
+                document.getElementById('emailFinderForm').style.display = 'block';
+                showFinderAlert('Failed to find emails. Make sure the backend is running.', 'error');
+            }
+        });
+
+        // History functions
         async function openHistory() {
             const modal = document.getElementById('historyModal');
             const content = document.getElementById('historyContent');
             modal.classList.add('active');
 
-            // Show loading
             content.innerHTML = `
                 <div class="loading active">
                     <div class="spinner"></div>
@@ -722,21 +954,18 @@
         }
 
         function loadHistoryEmail(email) {
-            // Close modal
             closeHistory();
+            switchTab('generator');
 
-            // Load data into results view
             document.getElementById('subjectLine').textContent = email.subject_line;
             document.getElementById('emailBody').textContent = email.body;
 
-            // Show results
             document.getElementById('emailForm').style.display = 'none';
             document.getElementById('results').classList.add('active');
 
             showAlert('Email loaded from history 📚', 'success');
         }
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('historyModal');
             if (event.target === modal) {
@@ -744,6 +973,7 @@
             }
         }
 
+        // Utility functions
         function copyToClipboard() {
             const subject = document.getElementById('subjectLine').textContent;
             const body = document.getElementById('emailBody').textContent;
@@ -754,6 +984,20 @@
             }).catch(err => {
                 console.error('Failed to copy:', err);
                 showAlert('Failed to copy to clipboard', 'error');
+            });
+        }
+
+        function copyBestEmail() {
+            if (bestEmailCache) {
+                navigator.clipboard.writeText(bestEmailCache).then(() => {
+                    showFinderAlert(`📋 Copied: ${bestEmailCache}`, 'success');
+                });
+            }
+        }
+
+        function copyEmail(email) {
+            navigator.clipboard.writeText(email).then(() => {
+                showFinderAlert(`📋 Copied: ${email}`, 'success');
             });
         }
 
@@ -776,6 +1020,21 @@
 
         function hideAlert() {
             document.getElementById('alert').style.display = 'none';
+        }
+
+        function showFinderAlert(message, type) {
+            const alert = document.getElementById('finderAlert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+
+            setTimeout(() => {
+                hideFinderAlert();
+            }, 5000);
+        }
+
+        function hideFinderAlert() {
+            document.getElementById('finderAlert').style.display = 'none';
         }
 
         function clearForm() {
