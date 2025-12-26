@@ -751,7 +751,7 @@
             hideAlert();
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/ai-generation/generate-complete', {
+                const response = await fetch('https://reachcraft.onrender.com/api/ai-generation/generate-complete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -815,7 +815,7 @@
             hideFinderAlert();
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/email-discovery/discover', {
+                const response = await fetch('https://reachcraft.onrender.com/api/email-discovery/discover', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -908,7 +908,7 @@
             `;
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/ai-generation/history?limit=50');
+                const response = await fetch('https://reachcraft.onrender.com/api/ai-generation/history?limit=50');
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
