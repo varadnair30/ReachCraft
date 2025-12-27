@@ -283,7 +283,19 @@ MS Computer Science @ UT Arlington | 4+ years experience in Full-Stack + Cloud +
 
 ## 🐛 Known Issues
 
-None currently! Report issues [here](https://github.com/varadnair30/ReachCraft/issues).
+### SMTP Verification Timeout in Production
+**Issue:** Email discovery SMTP verification times out on Render's free tier (returns 20% confidence for all emails).
+
+**Cause:** Render blocks outbound SMTP connections on port 25 for security/spam prevention.
+
+**Workaround:** 
+- **Local development:** SMTP verification works perfectly (use `uvicorn app.main:app --reload`)
+- **Production:** Uncheck "Verify emails via SMTP" checkbox for instant pattern-based results (60-85% confidence)
+- **Alternative:** Use paid Render plan ($7/month) or deploy to a platform that allows SMTP (AWS, GCP, DigitalOcean)
+
+**Status:** This is a platform limitation, not a bug in ReachCraft. The app works as designed locally.
+
+Report issues [here](https://github.com/varadnair30/ReachCraft/issues).
 
 ---
 
@@ -375,6 +387,12 @@ This project demonstrates:
 - Environment variables managed via Render dashboard
 - Supabase RLS policies for database security
 - API key authentication for Gemini
+
+### Known Limitations (Free Tier)
+- **SMTP Verification**: Blocked on Render free tier (port 25 restricted). Use local development for full SMTP verification, or uncheck the verification option in production for pattern-based email discovery.
+- **Cold start**: ~5-10 seconds after 15 minutes of inactivity
+- **Uptime**: 24/7 with free tier spin-down
+
 
 ---
 
