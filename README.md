@@ -5,6 +5,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)](https://fastapi.tiangolo.com/)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://reachcraft-frontend.onrender.com/)
+
+**🌐 Live Application:** [https://reachcraft-frontend.onrender.com/](https://reachcraft-frontend.onrender.com/)  
+**📚 API Docs:** [https://reachcraft.onrender.com/docs](https://reachcraft.onrender.com/docs)
+
+---
 
 ## 🎯 Problem Statement
 
@@ -12,9 +18,11 @@ Job seekers send 200+ applications before landing an offer, with cold applicatio
 
 Existing tools (Hunter.io `$49/month`, Apollo.io `$79/month`) are expensive and rely on paid APIs. **ReachCraft is 100% free, open-source, and built for job seekers by a job seeker.**
 
+---
+
 ## ✨ Features
 
-### 🤖 AI-Powered Email Generation ✅ LIVE
+### 🤖 AI-Powered Email Generation ✅ LIVE IN PRODUCTION
 - **Resume-driven email generation** that adapts to each role's requirements
 - **Role-specific "I KNOW WHAT YOU WANT" sections** (defense autonomy ≠ fintech backend ≠ AI/ML)
 - **Dynamic intro paragraphs** that highlight relevant experience per job description
@@ -24,7 +32,7 @@ Existing tools (Hunter.io `$49/month`, Apollo.io `$79/month`) are expensive and 
 - **Email history modal** to view and reuse past emails
 - **Duplicate detection** (warns if you've already emailed someone in the past 90 days)
 
-### 🔍 Email Discovery & Verification ✅ LIVE
+### 🔍 Email Discovery & Verification ✅ LIVE IN PRODUCTION
 - **7-pattern email generation** (first.last@, first@, firstlast@, etc.)
 - **SMTP verification** without paid APIs (checks if emails exist)
 - **Confidence scoring** (0-100%) for each email candidate
@@ -45,16 +53,21 @@ Existing tools (Hunter.io `$49/month`, Apollo.io `$79/month`) are expensive and 
 - A/B testing for subject lines
 - Analytics dashboard (response rates, best-performing emails)
 
+---
+
 ## 🛠️ Tech Stack
 
-**Frontend**: HTML/CSS/JavaScript with tab navigation  
-**Backend**: FastAPI, Python 3.10  
+**Frontend**: HTML/CSS/JavaScript with responsive tab navigation  
+**Backend**: FastAPI, Python 3.10.15  
 **Database**: Supabase (PostgreSQL) with RLS policies  
-**AI/ML**: Gemini Flash 1.5  
+**AI/ML**: Google Gemini Flash 1.5  
 **Email Discovery**: dnspython (MX/SMTP verification)  
+**Deployment**: Render (Backend Web Service + Static Site)  
+**CI/CD**: GitHub auto-deploy on push to main  
 **Queue/Cache**: Celery + Redis (planned)  
-**Monitoring**: Sentry (planned), Langfuse (planned)  
-**Deployment**: Local dev (current), Docker + Cloud Run (planned)
+**Monitoring**: Sentry (planned), Langfuse (planned)
+
+---
 
 ## 🚀 Quick Start
 
@@ -63,7 +76,7 @@ Existing tools (Hunter.io `$49/month`, Apollo.io `$79/month`) are expensive and 
 - Supabase account (free tier)
 - Gemini API key (free tier: 1,500 requests/day)
 
-### Installation
+### Local Development
 
 ```bash
 # Clone repository
@@ -96,7 +109,19 @@ python -m http.server 3000
 # UI: http://localhost:3000
 ```
 
-### Database Setup
+### Production Deployment
+
+**Backend & Frontend are already deployed and live!**
+
+- **Backend API:** [https://reachcraft.onrender.com](https://reachcraft.onrender.com)
+- **Frontend UI:** [https://reachcraft-frontend.onrender.com/](https://reachcraft-frontend.onrender.com/)
+- **Auto-Deploy:** Enabled via GitHub webhook (pushes to `main` trigger automatic redeploy)
+
+
+
+---
+
+## 📊 Database Setup
 
 ```sql
 -- Run these SQL commands in Supabase SQL Editor
@@ -134,10 +159,12 @@ CREATE TABLE contacts (
 -- Enable RLS and create policies (see docs/DATABASE.md for full setup)
 ```
 
-## 📊 Project Status
+---
 
-**Current Phase**: Week 2 Complete ✅ | Week 3 Starting 🚀  
-**Progress**: AI email generation + Email discovery live with full UI
+## 📈 Project Status
+
+**Current Phase**: Week 2 Complete ✅ | Deployed to Production 🚀 | Week 3 Starting  
+**Progress**: AI email generation + Email discovery live with full UI in production
 
 ### Development Timeline
 - [x] Week 0: Planning & Architecture
@@ -147,7 +174,7 @@ CREATE TABLE contacts (
   - [x] Simple web UI for testing email generation
   - [x] Supabase database schema (campaigns, emails, contacts tables)
   - [x] Gemini Flash 1.5 integration
-- [x] **Week 2: Database Persistence + Email Discovery**
+- [x] **Week 2: Database Persistence + Email Discovery + Production Deployment**
   - [x] Supabase persistence for all generated emails
   - [x] Email history endpoint with pagination (`GET /api/ai-generation/history`)
   - [x] Duplicate checking (90-day window with warnings)
@@ -156,27 +183,34 @@ CREATE TABLE contacts (
   - [x] Contacts database with confidence scoring
   - [x] Email Finder UI with tab navigation
   - [x] Copy buttons and "Find Another Email" workflow
+  - [x] **Production deployment to Render**
+  - [x] **CORS configuration for cross-origin requests**
+  - [x] **CI/CD with automatic GitHub deploys**
 - [ ] Week 3: Email Sending + Tracking
 - [ ] Week 4: Chrome Extension
-- [ ] Week 5: Polish + Testing + Deployment
+- [ ] Week 5: Polish + Testing + Advanced Features
 - [ ] Week 6: Demo Video + Portfolio Integration
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for detailed weekly milestones.
+
+
+---
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────────┐
-│   HTML/JS UI with Tab Navigation        │
+│   Frontend (Render Static Site)        │
+│   HTML/JS UI with Tab Navigation       │
 │   - Email Generator                     │
 │   - Email Finder                        │
 │   - History Modal                       │
 └──────────────┬──────────────────────────┘
-               │ REST API
+               │ HTTPS REST API (CORS enabled)
 ┌──────────────▼──────────────────────────┐
-│   FastAPI Backend                       │
+│   FastAPI Backend (Render Web Service) │
 │   - /api/ai-generation/*                │
 │   - /api/email-discovery/*              │
+│   - Auto-deploy on Git push             │
 └──┬────────────────────────────────────┬──┘
    │                                    │
    ▼                                    ▼
@@ -188,18 +222,23 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for detailed weekly milestones.
 └──────────────────┘         └──────────────────┘
 ```
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed design.
+
+
+---
 
 ## 💰 Cost
 
-**Total: $0** (currently using only free tiers)
+**Total: $0/month** (currently using only free tiers)
 
 All services use free tiers:
 - **Gemini Flash 1.5**: 1,500 requests/day (free forever)
 - **Supabase**: 500MB PostgreSQL database (free forever)
 - **dnspython**: Local SMTP verification (free forever)
+- **Render**: Free tier for web service + static site
 - Resend: 3,000 emails/month (free) *[planned]*
 - SendGrid: 3,000 emails/month (free) *[planned]*
+
+---
 
 ## 📈 Impact Goals
 
@@ -208,21 +247,28 @@ All services use free tiers:
 - **120% increase** in response rates vs generic applications
 - **$0 cost** (no paid API dependencies)
 - **100+ GitHub stars** (help other job seekers!)
+- **Production-ready deployment** with CI/CD ✅
+
+---
 
 ## 🤝 Contributing
 
 This project is open-source to help job seekers worldwide. Contributions welcome!
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+
+---
 
 ## 📝 License
 
 MIT License - see [LICENSE](LICENSE) for details.
 
+---
+
 ## 👨‍💻 Author
 
 **Varad Nair**  
-MS Computer Science @ UT Arlington | 4+ years experience in Full-Stack + AI/ML  
+MS Computer Science @ UT Arlington | 4+ years experience in Full-Stack + Cloud + AI/ML  
 [Portfolio](https://varadnair30.github.io/my_portfolio/) | [LinkedIn](https://linkedin.com/in/varad-nair) | [GitHub](https://github.com/varadnair30)
 
 ---
@@ -233,20 +279,25 @@ MS Computer Science @ UT Arlington | 4+ years experience in Full-Stack + AI/ML
 
 ---
 
-## 📚 Documentation
 
-- [Architecture Overview](docs/ARCHITECTURE.md)
-- [Development Roadmap](docs/ROADMAP.md)
-- [API Documentation](docs/API.md)
-- [Database Schema](docs/DATABASE.md) *[new]*
-- [Deployment Guide](docs/DEPLOYMENT.md) *[coming soon]*
-- [Contributing Guidelines](CONTRIBUTING.md)
 
 ## 🐛 Known Issues
 
-None yet! Report issues [here](https://github.com/varadnair30/ReachCraft/issues).
+None currently! Report issues [here](https://github.com/varadnair30/ReachCraft/issues).
+
+---
 
 ## 🗓️ Development Log
+
+### Week 2.5 - Production Deployment ✅ (December 26, 2025)
+- ✅ Backend deployed to Render Web Service
+- ✅ Frontend deployed to Render Static Site
+- ✅ Fixed Python version compatibility (3.10.15 for pydantic 2.5.3)
+- ✅ Configured CORS middleware for cross-origin requests
+- ✅ Set up CI/CD with automatic GitHub deployments
+- ✅ Environment variable management in production
+- ✅ Production testing and validation
+- **Status: FULLY DEPLOYED AND LIVE** 🎉
 
 ### Week 2 - Complete ✅ (December 21-25, 2025)
 - ✅ Supabase persistence integrated (`emails` and `contacts` tables)
@@ -273,38 +324,58 @@ None yet! Report issues [here](https://github.com/varadnair30/ReachCraft/issues)
 - ✅ Simple web UI for testing email generation
 - ✅ Tested on defense autonomy, AI/ML, and backend roles
 
----
 
-## 📸 Screenshots
-
-### Email Generator
-![Email Generator](docs/screenshots/email-generator.png) *[add screenshot]*
-
-### Email Finder
-![Email Finder](docs/screenshots/email-finder.png) *[add screenshot]*
-
-### History Modal
-![History](docs/screenshots/history.png) *[add screenshot]*
 
 ---
 
 **⭐ Star this repo if you find it helpful!**
+
+---
 
 ## 🎯 Portfolio Integration
 
 **For Hiring Managers:**
 
 This project demonstrates:
-- ✅ **Full-stack development** (FastAPI backend, HTML/JS frontend, PostgreSQL database)
+- ✅ **Full-stack development** (FastAPI backend, responsive frontend, PostgreSQL database)
 - ✅ **AI/ML integration** (Gemini API, prompt engineering, anti-hallucination)
 - ✅ **System design** (REST APIs, database schema, async processing)
-- ✅ **Problem-solving** (free SMTP verification vs $49/month paid tools)
-- ✅ **Shipping ability** (end-to-end working product in 2 weeks)
+- ✅ **DevOps & Deployment** (Render deployment, CI/CD, CORS, environment management)
+- ✅ **Problem-solving** (free SMTP verification vs $49/month paid tools, Python version conflicts)
+- ✅ **Shipping ability** (end-to-end working product deployed to production in 2 weeks)
 
 **Real-world results:**
-- 200+ personalized emails generated
-- 3+ interviews landed from cold outreach
-- 0% cost (all free-tier services)
-- Clean, production-ready code
+- ✅ Fully deployed production application
+- ✅ 200+ personalized emails capable of being generated
+- ✅ 0% operational cost (all free-tier services)
+- ✅ Clean, production-ready code with proper error handling
+- ✅ CI/CD pipeline with automatic deployments
 
-[View Live Demo](https://varadnair30.github.io/my_portfolio/projects/reachcraft) *[coming soon]*
+**🌐 Try it yourself:** [https://reachcraft-frontend.onrender.com/](https://reachcraft-frontend.onrender.com/)
+
+---
+
+## 🚀 Deployment Details
+
+### Technology Stack (Production)
+- **Platform**: Render (Web Service + Static Site)
+- **Runtime**: Python 3.10.15
+- **Framework**: FastAPI 0.109.0
+- **Database**: Supabase (PostgreSQL)
+- **AI Model**: Google Gemini Flash 1.5
+- **CI/CD**: GitHub webhook auto-deploy
+
+### Performance
+- **Cold start**: ~5-10 seconds (free tier)
+- **Response time**: <2 seconds for email generation
+- **Uptime**: 24/7 (with free tier spin-down after 15 min inactivity)
+
+### Security
+- CORS configured for production domains
+- Environment variables managed via Render dashboard
+- Supabase RLS policies for database security
+- API key authentication for Gemini
+
+---
+
+**Made with 💪 determination and ☕ coffee during an active job search**
