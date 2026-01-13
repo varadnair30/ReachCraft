@@ -26,7 +26,7 @@ Existing tools (Hunter.io `$49/month`, Apollo.io `$79/month`) are expensive and 
 - **Resume-driven email generation** that adapts to each role's requirements
 - **Role-specific "I KNOW WHAT YOU WANT" sections** (defense autonomy ≠ fintech backend ≠ AI/ML)
 - **Dynamic intro paragraphs** that highlight relevant experience per job description
-- **Non-cliché subject line generation** using Gemini Flash 1.5
+- **Non-cliché subject line generation** using Gemini Flash 2.5
 - **Anti-hallucination safeguards** with grounded resume facts
 - **Database persistence** with Supabase (saves all generated emails)
 - **Email history modal** to view and reuse past emails
@@ -60,7 +60,7 @@ Existing tools (Hunter.io `$49/month`, Apollo.io `$79/month`) are expensive and 
 **Frontend**: HTML/CSS/JavaScript with responsive tab navigation  
 **Backend**: FastAPI, Python 3.10.15  
 **Database**: Supabase (PostgreSQL) with RLS policies  
-**AI/ML**: Google Gemini Flash 1.5  
+**AI/ML**: Google Gemini Flash 2.5  
 **Email Discovery**: dnspython (MX/SMTP verification)  
 **Deployment**: Render (Backend Web Service + Static Site)  
 **CI/CD**: GitHub auto-deploy on push to main  
