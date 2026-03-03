@@ -266,26 +266,28 @@ async def generate_complete_email(request: CompleteEmailRequest):
                 # Calculate 90 days ago (FIXED!)
                 ninety_days_ago = (datetime.utcnow() - timedelta(days=90)).isoformat()
 
-                result = supabase.table("emails").select("*").eq(
-                    "recipient_email", request.recipient_email
-                ).gte(
-                    "created_at", ninety_days_ago  # ✅ Fixed: Check past 90 days, not future
-                ).execute()
-
+                # Fetch only what we need, only the latest match (cheaper + faster)
+                result = (
+                    supabase.table("emails")
+                    .select("id,created_at")
+                    .eq("recipient_email", request.recipient_email)
+                    .gte("created_at", ninety_days_ago)
+                    .order("created_at", desc=True)
+                    .limit(1)
+                    .execute()
+                )
 
                 if result.data and len(result.data) > 0:
                     last_email = result.data[0]
-                    email_date = last_email['created_at'][:10]  # Just the date part
+                    email_date = last_email["created_at"][:10]  # Just the date part
                     duplicate_warning = f"⚠️ You already emailed {request.recipient_email} on {email_date}"
                     logger.warning(duplicate_warning)
             except Exception as dup_err:
                 logger.error(f"Duplicate check failed: {dup_err}")
 
-
         # 🔹 If job_description is provided, auto-derive mission/tech_stack when missing
         company_mission = request.company_mission
         company_tech_stack = request.company_tech_stack
-
 
         if request.job_description and (not company_mission or not company_tech_stack):
             parsed = parse_job_description(request.job_description)
@@ -295,7 +297,6 @@ async def generate_complete_email(request: CompleteEmailRequest):
             if not company_tech_stack and parsed["company_tech_stack"]:
                 company_tech_stack = parsed["company_tech_stack"]
                 logger.info(f"Derived tech stack from JD: {company_tech_stack}")
-
 
         # Build prompt with all the new context
         prompt = PromptBuilder.build_complete_email_prompt(
@@ -322,16 +323,12 @@ async def generate_complete_email(request: CompleteEmailRequest):
             tone=request.tone
         )
 
+        logger.info(f"Generating email JSON with Gemini (includes subject variations)...")
 
-        logger.info(f"Generating email body with Gemini (Varad style)...")
-
-
-        # Generate email
+        # Single Gemini call: subject + body + subject_variations
         email_data = gemini.generate_json(prompt)
 
-
         logger.info(f"Email generated successfully")
-
 
         # Calculate metrics
         body = email_data.get('body', '')
@@ -340,34 +337,18 @@ async def generate_complete_email(request: CompleteEmailRequest):
         confidence = gemini.calculate_confidence(body)
         key_hook = email_data.get('key_hook', '')
 
+        subject_line = email_data.get("subject") or "I Know What You're Building"
 
-        # Generate subject variations
-        logger.info(f"Generating subject variations...")
-
-
-        subject_prompt = PromptBuilder.build_subject_line_prompt(
-            recipient_name=request.recipient_first_name,
-            recipient_company=request.recipient_company,
-            recipient_title=request.recipient_title,
-            sender_name=request.sender_name,
-            sender_role=request.sender_background,
-            purpose=request.purpose,
-            company_mission=request.company_mission,
-            role_name=request.role_interested_in
-        )
-
-
-        subject_variations = gemini.generate_subject_lines(subject_prompt)
-
-
-        subject_line = email_data.get('subject', subject_variations[0])
-
+        subject_variations_raw = email_data.get("subject_variations") or []
+        subject_variations = subject_variations_raw if isinstance(subject_variations_raw, list) else []
+        # Ensure the primary subject is included first
+        if subject_line and (not subject_variations or subject_variations[0] != subject_line):
+            subject_variations = [subject_line] + [s for s in subject_variations if s != subject_line]
 
         # 🆕 INSERT into Supabase
         email_id = None
         try:
             recipient_full_name = f"{request.recipient_first_name} {request.recipient_last_name or ''}".strip()
-
 
             insert_data = {
                 "recipient_name": recipient_full_name,
@@ -381,9 +362,7 @@ async def generate_complete_email(request: CompleteEmailRequest):
                 "created_at": datetime.utcnow().isoformat()
             }
 
-
             result = supabase.table("emails").insert(insert_data).execute()
-
 
             if result.data:
                 email_id = result.data[0].get('id')
@@ -392,9 +371,7 @@ async def generate_complete_email(request: CompleteEmailRequest):
             logger.error(f"Failed to save email to Supabase: {db_err}")
             # Don't fail the request, just log it
 
-
         logger.info(f"Complete! Word count: {word_count}, Key hook: {key_hook[:50] if key_hook else 'N/A'}...")
-
 
         return CompleteEmailResponse(
             subject_line=subject_line,

@@ -273,6 +273,7 @@ CRITICAL ELEMENTS:
 OUTPUT FORMAT (JSON):
 {{
   "subject": "One killer subject line that shows you actually understand their work",
+  "subject_variations": ["Alt subject 1", "Alt subject 2", "Alt subject 3"],
   "body": "Complete email following the structure above",
   "key_hook": "One sentence that captures why this email stands out for this specific role"
 }}
